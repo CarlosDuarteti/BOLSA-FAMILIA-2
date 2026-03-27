@@ -1,4 +1,6 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, regexp_replace
+
 spark = SparkSession.builder\
 .appName("Bolsa Familia")\
 .getOrCreate()
@@ -66,3 +68,17 @@ for antiga, nova in colunas_padrao.items():
 df_tratado.show()
 
 #TRATAMENTO AUTOMÁTICO
+import unicodedata, re
+
+def padronizar_nome(col):
+    col = col.lower()#Transforma tudo para minúsculo
+    col = unicodedata.normalize("NFD", col)#Retira os espaços em branco
+    col = col.encode("ascii", "ignore").decode("utf-8")#RIgnorando a codificação ASCI e transformando em UTF-8
+    col = re.sub(r"[^a-z0-9]+","_", col)#Aonde estiver espaço em branco trocar para "_"
+    col = col.strip("_")
+    return col
+
+df_tratado = df_tratado.toDF(
+    *[padronizar_nome(c) for c in df_tratado.columns]
+)
+
