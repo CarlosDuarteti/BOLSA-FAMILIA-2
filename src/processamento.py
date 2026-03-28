@@ -72,13 +72,32 @@ import unicodedata, re
 
 def padronizar_nome(col):
     col = col.lower()#Transforma tudo para minúsculo
-    col = unicodedata.normalize("NFD", col)#Retira os espaços em branco
-    col = col.encode("ascii", "ignore").decode("utf-8")#RIgnorando a codificação ASCI e transformando em UTF-8
+    col = unicodedata.normalize("NFD", col)#Separa todos os caracteres especiais dos caracteres comuns
+    col = col.encode("ascii", "ignore").decode("utf-8")#Ignorando a codificação ASCI e transformando em UTF-8, e ignora os caravteres especiais
     col = re.sub(r"[^a-z0-9]+","_", col)#Aonde estiver espaço em branco trocar para "_"
-    col = col.strip("_")
+    col = col.strip("_")#Identifica espaços em branco no início e substitui por "_"
     return col
 
 df_tratado = df_tratado.toDF(
     *[padronizar_nome(c) for c in df_tratado.columns]
 )
 
+#Apaga valores nulos de uma tabela especifica
+###df_tratado = df_tratado.dropna(subset=["valor_parcela"])
+
+#Apaga valores nulos da tabela inteira
+df_tratado = df_tratado.dropna()
+
+#Troca de "," por "."
+df_tratado = df_tratado.withColumn(
+    #Na coluna valor parcela, vai trocar o caractere "," por "."
+    "valor_parcela",
+    regexp_replace(col("Valor_parcela"), "," , ".")
+)
+
+#Convertendo a coluna Valor Parcela de STRING para o tipo DECIMAL
+df_tratado = df_tratado.withColumn(
+    #Na coluna valor parcela, vai trocar o caractere "," por "."
+    "valor_parcela",
+    col("Valor_parcela").cast("decimal(10,2)")
+)
