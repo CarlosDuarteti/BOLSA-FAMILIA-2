@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, regexp_replace
+from pyspark.sql.functions import col, regexp_replace, sum, avg, count, desc
 
 spark = SparkSession.builder\
 .appName("Bolsa Familia")\
@@ -101,3 +101,21 @@ df_tratado = df_tratado.withColumn(
     "valor_parcela",
     col("Valor_parcela").cast("decimal(10,2)")
 )
+
+#Calculando a somatoria do valor pago e tirando a média do valor pago
+df_tratado.agg(
+    sum("valor_parcela").alias("total_pago"),
+    avg("valor_parcela").alias("media_pagamento")
+).show()
+
+df_tratado.groupBy("uf")\
+    .agg(sum("valor_parcela").alias("total_pago"))\
+    .orderBy("total_pago", ascending=False)\
+    .show(10)
+
+ranking_favorecido = df_tratado.groupBy("cpf_favorecido", "nome_favorecido")\
+    .agg(
+        sum("valor_parcela").alias("valor_total_acumulado"),
+        count("valor_parcela").alias("quantidade_parcelas")
+    )\
+    .orderBy(desc("valor_total_acumulado"))
