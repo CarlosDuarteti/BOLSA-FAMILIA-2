@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, regexp_replace, sum, avg, count, desc
+import matplotlib.pyplot as plt
 
 spark = SparkSession.builder\
 .appName("Bolsa Familia")\
@@ -119,3 +120,20 @@ ranking_favorecido = df_tratado.groupBy("cpf_favorecido", "nome_favorecido")\
         count("valor_parcela").alias("quantidade_parcelas")
     )\
     .orderBy(desc("valor_total_acumulado"))
+
+print("Ranking dos 10 primeiros com valores acumulados")
+ranking_favorecido.show(10, truncate=False)
+
+df_uf = df_tratado.groupBy("uf") \
+    .agg(sum("valor_parcela").alias("total_pago")) \
+    .orderBy("total_pago", ascending=False) \
+    .limit(10) \
+    .toPandas()
+
+# Gráfico
+plt.figure()
+plt.bar(df_uf["uf"], df_uf["total_pago"])
+plt.title("Top 10 UFs - Total Pago Bolsa Família")
+plt.xlabel("UF")
+plt.ylabel("Total Pago")
+plt.show()
