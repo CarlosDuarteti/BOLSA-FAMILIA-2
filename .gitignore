@@ -3,3 +3,4 @@ dados/
 notebooks/
 venv/
 .ipynb_checkpoints/
+__pycache__
