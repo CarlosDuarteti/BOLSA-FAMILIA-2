@@ -4,8 +4,8 @@ def tratar_dados(df):
     df_tratado = df
 
     colunas_padrao = {
-    "MÊS COMPETÊNCIA": "mes_competencia",
-    "MÊS REFERÊNCIA": "mes_referencia",
+    "MÊS COMPETÊNCIA": "data_competencia",
+    "MÊS REFERÊNCIA": "data_referencia",
     "UF": "uf",
     "CÓDIGO MUNICÍPIO SIAFI": "codigo_municipio_siafi",
     "NOME MUNICÍPIO": "nome_municipio",
@@ -33,11 +33,11 @@ def tratar_dados(df):
     col("Valor_parcela").cast("decimal(10,2)"))
     .withColumn(
     "ano_competencia",
-    substring(col("data_compertencia"),1,4)
+    substring(col("data_competencia"),1,4)
     )
     .withColumn(
     "mes_competencia",
-    substring(col("data_compertencia"),5,2)
+    substring(col("data_competencia"),5,2)
     )
     )
 
